@@ -1,0 +1,65 @@
+﻿@model List<Supabase.Storage.FileObject>
+@{
+    ViewData["Title"] = "Danh sách file trên Storage";
+
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-folder2-open"></i> Quản lý tệp tin</h2>
+        <a asp-action="Index" class="btn btn-primary">Tải lên file mới</a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-warning">Chưa có file nào trong bucket "products".</div>
+    }
+    else
+    {
+        <div class="table-responsive shadow-sm rounded">
+            <table class="table table-hover align-middle bg-white">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Tên File</th>
+                        <th>Ngày tạo</th>
+                        <th>Kích thước</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var file in Model)
+                    {
+                        // Lưu ý: Tên file thực tế trong Supabase nằm ở thuộc tính Name
+                        <tr>
+                            <td>
+                                <i class="bi bi-file-earmark-code me-2"></i> @file.Name
+                            </td>
+                            <td>@file.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@(Convert.ToInt64(file.MetaData["size"]) / 1024) KB</td>
+                            <td class="text-center">
+                                <a href="https://urkrqfuboqiknvqbwwwd.supabase.co/storage/v1/object/public/pdf-bucket./@file.Name"
+                                   target="_blank" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-eye"></i> Xem
+                                </a>
+                                <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete('@file.Name')">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(fileName) {
+            if(confirm("Bạn có chắc chắn muốn xóa file: " + fileName + "?")) {
+                // Bạn có thể viết thêm Action Delete để gọi tại đây
+                window.location.href = "/Products/Delete?fileName=" + fileName;
+            }
+        }
+    </script>
+}

@@ -1,0 +1,65 @@
+﻿@{
+    ViewData["Title"] = "Upload File to Supabase";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">Tải tài liệu lên Supabase Storage</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Upload" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Chọn file bất kỳ (PDF, Docx, Zip...)</label>
+                            <input type="file" name="file" class="form-control" required />
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-dark">
+                                <i class="bi bi-upload"></i> Tải lên ngay
+                            </button>
+                        </div>
+                    </form>
+
+                    @if (ViewBag.Message != null)
+                    {
+                        var alertClass = ViewBag.Message.Contains("thành công") ? "alert-success" : "alert-danger";
+                        <div class="alert @alertClass mt-3">
+                            @ViewBag.Message
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (ViewBag.ImageUrl != null)
+            {
+                <div class="card mt-4 shadow-sm border-primary">
+                    <div class="card-body text-center">
+                        <p class="text-primary fw-bold">File đã được lưu trữ:</p>
+                        <div class="p-3 bg-light rounded mb-3">
+                            <i class="bi bi-file-earmark-check" style="font-size: 3rem;"></i>
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                            <input type="text" class="form-control" value="@ViewBag.ImageUrl" id="urlLink" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyUrl()">Copy Link</button>
+                        </div>
+                        <a href="@ViewBag.ImageUrl" target="_blank" class="btn btn-sm btn-outline-primary">Tải về / Xem file</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function copyUrl() {
+            var copyText = document.getElementById("urlLink");
+            copyText.select();
+            document.execCommand("copy");
+            alert("Đã copy link file!");
+        }
+    </script>
+}
