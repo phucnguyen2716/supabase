@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Supabase.Data;
-using Supabase.Services;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Lấy chuỗi kết nối từ appsettings.json
@@ -14,7 +12,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 // 3. Đăng ký các Service khác
-builder.Services.AddScoped<SupabaseStorageService>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // 4. Cấu hình Identity

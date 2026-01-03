@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Supabase")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3002ce412104cc94f2995ec6387dd1bf26a570a2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f9c044bb93559e15fadefaa697a88da598c06694")]
 [assembly: System.Reflection.AssemblyProductAttribute("Supabase")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Supabase")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

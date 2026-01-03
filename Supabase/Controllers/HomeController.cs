@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client.Extensions.Msal;
 using Supabase.Models;
-using Supabase.Services;
+using Supabase.Storage;
 using System.Diagnostics;
 
 namespace Supabase.Controllers
@@ -9,14 +8,27 @@ namespace Supabase.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly SupabaseStorageService _storageService;
-        private const string BucketName = "pdf-bucket.";
+        private readonly Client _storageClient;
+        private readonly string _bucketName;
 
-
-        public HomeController(ILogger<HomeController> logger, SupabaseStorageService storageService)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
         {
             _logger = logger;
-            _storageService = storageService;
+
+            var url = configuration["Supabase:Url"]!;
+            var key = configuration["Supabase:ServiceKey"]!;
+            _bucketName = configuration["Supabase:BucketName"]!;
+
+            // Đảm bảo URL kết thúc bằng /storage/v1
+            var storageUrl = url.EndsWith("/storage/v1") ? url : $"{url.TrimEnd('/')}/storage/v1";
+
+            var headers = new Dictionary<string, string>
+            {
+                { "apikey", key },
+                { "Authorization", $"Bearer {key}" }
+            };
+
+            _storageClient = new Client(storageUrl, headers);
         }
 
         public IActionResult Index()
@@ -35,11 +47,27 @@ namespace Supabase.Controllers
 
             try
             {
-                // Gọi service đã viết ở bước trước
-                string publicUrl = await _storageService.UploadAsync(file);
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+
+                using (var ms = new MemoryStream())
+                {
+                    await file.CopyToAsync(ms);
+                    var fileBytes = ms.ToArray();
+
+                    var options = new Storage.FileOptions
+                    {
+                        ContentType = file.ContentType,
+                        Upsert = true
+                    };
+
+                    await _storageClient.From(_bucketName).Upload(fileBytes, fileName, options);
+                }
+
+                string publicUrl = _storageClient.From(_bucketName).GetPublicUrl(fileName);
 
                 ViewBag.Message = "Upload thành công!";
                 ViewBag.ImageUrl = publicUrl;
+                ViewBag.OriginalFileName = file.FileName;
             }
             catch (Exception ex)
             {
@@ -48,13 +76,19 @@ namespace Supabase.Controllers
 
             return View("Index");
         }
-        // Thêm vào file SupabaseStorageService.cs
+
         public async Task<IActionResult> Privacy()
         {
-            // Gọi phương thức list từ Service đã viết ở trên
-            var files = await _storageService.ListFilesAsync();
-
-            return View(files);
+            try
+            {
+                var files = await _storageClient.From(_bucketName).List();
+                return View(files ?? new List<Supabase.Storage.FileObject>());
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Message = "Lỗi khi lấy danh sách file: " + ex.Message;
+                return View(new List<Supabase.Storage.FileObject>());
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
